@@ -20,6 +20,8 @@ build:
   stage: build
   script:
     - pnpm build
+    - pwd
+    - ls
   artifacts:
     paths:
       - dist
