@@ -7,7 +7,6 @@ stages:
   - prod-deploy
 
 before_script:
-  - cd ./webapp
   - apt update -qy
   - apt install -y lftp
   - apt install -y curl
@@ -19,6 +18,7 @@ before_script:
 build:
   stage: build
   script:
+    - cd ./webapp
     - pnpm build
   artifacts:
     paths:
@@ -36,6 +36,7 @@ dockerize_webapp:
     DOCKER_TLS_CERTDIR: ""
   before_script: []
   script:
+    - cd ./webapp
     - echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
     - docker build -t "$DOCKERHUB_IMAGE:latest" -t "$DOCKERHUB_IMAGE:$CI_COMMIT_SHORT_SHA" webapp
     - docker push "$DOCKERHUB_IMAGE:latest"
@@ -46,7 +47,7 @@ dockerize_webapp:
 
 .deploy_template: &deploy_template
   script:
-    - cd build
+    - cd ./webapp/build
     - lftp -e "set ssl:verify-certificate no; open $FTP_HOSTNAME; user $FTP_USERNAME $FTP_PASSWORD; mirror -X .* -X .*/ --reverse --verbose --delete . $DEPLOY_PATH; bye"
   dependencies:
     - build
