@@ -6,6 +6,7 @@ stages:
   - prod-deploy
 
 before_script:
+  - cd ./webapp
   - apt update -qy
   - apt install -y lftp
   - apt install -y curl
@@ -37,7 +38,7 @@ build:
 test_deploy:
   stage: test-deploy
   variables:
-    DEPLOY_PATH: ./preview-deployment/preview.accountlinks.apps.lucanoahcaprez.ch/
+    DEPLOY_PATH: ./preview-deployment/preview.azfunctionsperformance.apps.lucanoahcaprez.ch/
     FTP_HOSTNAME: $FTP_HOSTNAME
     FTP_USERNAME: $FTP_USERNAME
     FTP_PASSWORD: $FTP_PASSWORD
@@ -52,7 +53,7 @@ test_deploy:
 prod_deploy:
   stage: prod-deploy
   variables:
-    DEPLOY_PATH: ./accountlinks.apps.lucanoahcaprez.ch/
+    DEPLOY_PATH: ./azfunctionsperformance.apps.lucanoahcaprez.ch/
     FTP_HOSTNAME: $FTP_HOSTNAME
     FTP_USERNAME: $FTP_USERNAME
     FTP_PASSWORD: $FTP_PASSWORD
