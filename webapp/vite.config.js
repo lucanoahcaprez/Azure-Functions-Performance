@@ -1,11 +1,12 @@
-import { defineConfig } from 'vite'
-import { svelte } from '@sveltejs/vite-plugin-svelte'
+import tailwindcss from '@tailwindcss/vite';
+import { sveltekit } from '@sveltejs/kit/vite';
+import { defineConfig } from 'vitest/config';
 import pkg from './package.json';
 
-// https://vite.dev/config/
 export default defineConfig({
-  plugins: [svelte()],
-  define: {
-    __PKG_VERSION__: JSON.stringify(pkg.version),
-  },
-})
+	plugins: [sveltekit(), tailwindcss()],
+	define: {
+		__PKG_VERSION__: JSON.stringify(pkg.version)
+	}
+
+});
