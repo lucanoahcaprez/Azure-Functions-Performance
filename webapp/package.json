@@ -1,7 +1,7 @@
 {
   "name": "webapp",
   "private": true,
-  "version": "0.1.9",
+  "version": "0.1.10",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@sveltejs/adapter-static": "^3.0.10",
+    "@sveltejs/kit": "^2.49.2",
     "@tailwindcss/vite": "^4.1.18",
     "vitest": "^4.0.15"
   }
