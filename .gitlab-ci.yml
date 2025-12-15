@@ -46,6 +46,8 @@ dockerize_webapp:
 
 .deploy_template: &deploy_template
   script:
+    - pwd
+    - ls
     - cd ./webapp/build
     - lftp -e "set ssl:verify-certificate no; open $FTP_HOSTNAME; user $FTP_USERNAME $FTP_PASSWORD; mirror -X .* -X .*/ --reverse --verbose --delete . $DEPLOY_PATH; bye"
   dependencies:
