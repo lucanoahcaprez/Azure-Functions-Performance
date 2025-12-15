@@ -61,6 +61,9 @@
     },
   ];
 
+  const currentYear = new Date().getFullYear();
+  const version = __PKG_VERSION__;
+
   let selectedRuntimeId = '';
   let selectedWorkloadId = '';
   let urlMap = {};
@@ -383,13 +386,14 @@
   <title>Azure Function Performance Bench</title>
 </svelte:head>
 
-<main class="text-slate-100 px-4 py-8 md:py-12">
+<div class="min-h-screen flex flex-col">
+  <main class="text-slate-100 px-4 py-8 md:py-12 flex-1">
   <div class="max-w-6xl mx-auto space-y-8">
     <section class="glass-panel grid-bg rounded-3xl p-6 md:p-8">
       <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
         <div class="space-y-2">
-          <p class="text-xs uppercase tracking-[0.25em] text-slate-400">Azure Function performance</p>
-          <h1 class="text-3xl md:text-4xl font-semibold font-display tracking-tight">Runtime latency compare</h1>
+          <p class="text-xs uppercase tracking-[0.25em] text-slate-400">Azure Functions performance</p>
+          <h1 class="text-3xl md:text-4xl font-semibold font-display tracking-tight">Runtime latency comparison</h1>
           <p class="text-slate-300 max-w-2xl">
             Test .NET, Node.js, Python, PowerShell, and Java workloads side by side. Enter one signed Function URL per runtime, then switch
             workloads via query params automatically.
@@ -804,4 +808,73 @@
       </div>
     </div>
   {/if}
-</main>
+    <section class="max-w-6xl mx-auto mt-12 md:mt-16">
+      <div class="glass-panel rounded-3xl p-8 md:p-10 bg-gradient-to-b from-slate-900/70 to-slate-900/40 border border-white/5">
+        <div class="text-center space-y-3">
+          <h3 class="text-3xl md:text-4xl font-bold">Developer & Support</h3>
+          <div class="h-0.5 w-16 bg-cyan-400/60 mx-auto rounded-full"></div>
+          <p class="text-sm md:text-base text-slate-300">
+            Built with &hearts; by a passionate developer. Get help and explore more projects.
+          </p>
+        </div>
+
+        <div class="mt-8 grid gap-5 md:gap-6 md:grid-cols-2">
+          <div class="rounded-3xl bg-slate-700/50 border border-white/10 p-6 md:p-8 shadow-lg space-y-4">
+            <h4 class="text-2xl font-semibold text-white">About the Developer</h4>
+            <p class="text-slate-200">
+              LNC App Accountlinks is crafted and maintained with dedication by <strong>Luca Noah Caprez</strong>.
+            </p>
+            <a
+              href="https://lucanoahcaprez.ch/me"
+              target="_blank"
+              class="inline-flex items-center justify-center px-5 py-3 rounded-xl bg-white text-slate-900 font-semibold gap-2 shadow-md hover:shadow-lg transition"
+            >
+              More Information <span aria-hidden="true">↗</span>
+            </a>
+          </div>
+
+          <div class="rounded-3xl bg-slate-700/50 border border-white/10 p-6 md:p-8 shadow-lg space-y-4">
+            <h4 class="text-2xl font-semibold text-white">Need Help?</h4>
+            <div class="space-y-3">
+              <a
+                href="https://lucanoahcaprez.ch/docs"
+                target="_blank"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-900/80 border border-white/10 text-slate-100 hover:border-cyan-400/50 transition"
+              >
+                <span aria-hidden="true">📖</span> <span class="font-semibold">Documentation</span>
+              </a>
+              <a
+                href="https://lucanoahcaprez.ch/contact"
+                target="_blank"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-900/80 border border-white/10 text-slate-100 hover:border-cyan-400/50 transition"
+              >
+                <span aria-hidden="true">💬</span> <span class="font-semibold">Community & Contact</span>
+              </a>
+              <a
+                href="https://lucanoahcaprez.ch/services"
+                target="_blank"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-900/80 border border-white/10 text-slate-100 hover:border-cyan-400/50 transition"
+              >
+                <span aria-hidden="true">💼</span> <span class="font-semibold">Professional Services</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="mt-auto">
+    <div class="flex flex-wrap items-center justify-center bg-white/5 border-t border-white/10 text-xs md:text-sm py-4 text-slate-200">
+      <p class="flex flex-wrap items-center justify-center gap-2 px-4 text-center">
+        &copy; {currentYear} | Version {version}
+        <span class="hidden sm:inline">
+          | Made with &hearts; by
+          <a href="https://lucanoahcaprez.ch/me" target="_blank" class="text-cyan-200 hover:text-white font-semibold">@lucanoahcaprez</a>
+        </span>
+        |
+        <a href="https://lucanoahcaprez.ch/legal" target="_blank" class="text-cyan-200 hover:text-white font-semibold">Legal</a>
+      </p>
+    </div>
+  </footer>
+</div>

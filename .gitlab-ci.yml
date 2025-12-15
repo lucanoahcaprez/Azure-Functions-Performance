@@ -1,0 +1,63 @@
+image: ubuntu:24.04
+
+stages:
+  - build
+  - test-deploy
+  - prod-deploy
+
+before_script:
+  - apt update -qy
+  - apt install -y lftp
+  - apt install -y curl
+  - curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+  - apt-get install -y nodejs
+  - npm install -g pnpm
+  - pnpm install --no-frozen-lockfile
+
+build:
+  stage: build
+  script:
+    - pnpm build
+  artifacts:
+    paths:
+      - build
+    expire_in: 1 hour
+
+.deploy_template: &deploy_template
+  script:
+    - cd build
+    - lftp -e "set ssl:verify-certificate no; open $FTP_HOSTNAME; user $FTP_USERNAME $FTP_PASSWORD; mirror -X .* -X .*/ --reverse --verbose --delete . $DEPLOY_PATH; bye"
+  dependencies:
+    - build
+  before_script:
+    - apt update -qy
+    - apt install -y lftp
+
+# Deploy to test server automatically after build
+test_deploy:
+  stage: test-deploy
+  variables:
+    DEPLOY_PATH: ./preview-deployment/preview.accountlinks.apps.lucanoahcaprez.ch/
+    FTP_HOSTNAME: $FTP_HOSTNAME
+    FTP_USERNAME: $FTP_USERNAME
+    FTP_PASSWORD: $FTP_PASSWORD
+  <<: *deploy_template
+  only:
+    - branches
+  except:
+    - main
+    - master
+
+# Deploy to prod server only after manual approval
+prod_deploy:
+  stage: prod-deploy
+  variables:
+    DEPLOY_PATH: ./accountlinks.apps.lucanoahcaprez.ch/
+    FTP_HOSTNAME: $FTP_HOSTNAME
+    FTP_USERNAME: $FTP_USERNAME
+    FTP_PASSWORD: $FTP_PASSWORD
+  <<: *deploy_template
+  only:
+    - main
+    - master
+  allow_failure: false
