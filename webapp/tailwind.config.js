@@ -9,8 +9,8 @@ export default {
         mono: ['"IBM Plex Mono"', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
       colors: {
-        midnight: '#0b1021',
-        ink: '#0f172a',
+        midnight: '#191e24',
+        ink: '#000000',
         neptune: '#27c5ff',
         aurora: '#7c3aed',
       },

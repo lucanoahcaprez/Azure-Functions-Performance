@@ -20,8 +20,6 @@ build:
   stage: build
   script:
     - pnpm build
-    - pwd
-    - ls
   artifacts:
     paths:
       - dist
@@ -48,6 +46,7 @@ dockerize_webapp:
 
 .deploy_template: &deploy_template
   script:
+    - cd dist
     - lftp -e "set ssl:verify-certificate no; open $FTP_HOSTNAME; user $FTP_USERNAME $FTP_PASSWORD; mirror -X .* -X .*/ --reverse --verbose --delete . $DEPLOY_PATH; bye"
   dependencies:
     - build
