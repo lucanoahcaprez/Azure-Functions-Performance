@@ -19,6 +19,8 @@ before_script:
 build:
   stage: build
   script:
+    - pwd
+    - ls
     - pnpm build
   artifacts:
     paths:
