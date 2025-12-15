@@ -7,6 +7,7 @@ stages:
   - prod-deploy
 
 before_script:
+  - cd ./webapp
   - apt update -qy
   - apt install -y lftp
   - apt install -y curl
