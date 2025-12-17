@@ -1,11 +1,11 @@
 {
   "name": "webapp",
   "private": true,
-  "version": "0.1.13",
+  "version": "0.1.14",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "svelte-kit build",
     "preview": "vite preview",
     "releasePatch": "git add . && git commit -am \"new patch version release\" && npm version patch && git push",
     "releaseMinor": "git add . && git commit -am \"new minor version release\" && npm version minor && git push",
@@ -22,7 +22,6 @@
   "dependencies": {
     "@sveltejs/adapter-static": "^3.0.10",
     "@sveltejs/kit": "^2.49.2",
-    "@tailwindcss/vite": "^4.1.18",
     "vitest": "^4.0.15"
   }
 }

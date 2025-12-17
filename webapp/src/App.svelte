@@ -844,7 +844,7 @@
                 <span aria-hidden="true">📖</span> <span class="font-semibold">Documentation</span>
               </a>
               <a
-                href="https://lucanoahcaprez.ch/contact"
+                href="https://github.com/lucanoahcaprez/Azure-Functions-Performance"
                 target="_blank"
                 class="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-900/80 border border-white/10 text-slate-100 hover:border-cyan-400/50 transition"
               >
