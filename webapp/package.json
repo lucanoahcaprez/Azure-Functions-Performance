@@ -1,11 +1,11 @@
 {
   "name": "webapp",
   "private": true,
-  "version": "0.1.14",
+  "version": "0.1.15",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "svelte-kit build",
+    "build": "vite build",
     "preview": "vite preview",
     "releasePatch": "git add . && git commit -am \"new patch version release\" && npm version patch && git push",
     "releaseMinor": "git add . && git commit -am \"new minor version release\" && npm version minor && git push",
