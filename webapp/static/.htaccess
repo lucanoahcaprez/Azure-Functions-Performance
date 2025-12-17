@@ -1,0 +1,8 @@
+RewriteEngine On
+
+# Handle Angular and other front-end routes
+# If the requested file or directory does not exist, serve index.html
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !\.
+RewriteRule ^(.*)$ /index.html [L]

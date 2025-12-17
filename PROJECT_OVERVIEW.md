@@ -13,6 +13,17 @@ Give a quick, side‑by‑side look at runtime behavior (CPU/IO/delay) with mini
 2) Open the webapp, paste one signed URL per runtime in the setup wizard.  
 3) Run manual calls or automatic batches; the UI records durations and renders a combined timeline and trend chart.
 
+## Sample page
+Live example: https://azfunctionsperformance.apps.lucanoahcaprez.ch/
+
+## Deploy the webapp with Docker
+From the repo root:
+```sh
+docker build -t azfunctionsperformance-webapp ./webapp
+docker run --rm -p 8080:80 azfunctionsperformance-webapp
+```
+Open http://localhost:8080 and add your signed Function URLs in the setup wizard.
+
 ## Workloads (shared parameters)
 - `workload`: `cpu` | `io` | `delay`
 - `iterations` (cpu), `sizeKb` (io), `delayMs` (delay)

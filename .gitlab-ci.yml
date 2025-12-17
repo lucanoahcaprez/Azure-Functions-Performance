@@ -5,6 +5,7 @@ stages:
   - dockerize
   - test-deploy
   - prod-deploy
+  - mirror-github
 
 before_script:
   - cd ./webapp
@@ -22,7 +23,7 @@ build:
     - pnpm build
   artifacts:
     paths:
-      - build
+      - webapp/build
     expire_in: 1 hour
 
 dockerize_webapp:
@@ -36,8 +37,13 @@ dockerize_webapp:
     DOCKER_TLS_CERTDIR: ""
   before_script: []
   script:
+    - cd ./webapp
+    - export DOCKERHUB_USERNAME="${DOCKERHUB_USERNAME:-$DOCKER_USERNAME}"
+    - export DOCKERHUB_PASSWORD="${DOCKERHUB_PASSWORD:-$DOCKER_PASSWORD}"
+    - if [ -z "$DOCKERHUB_USERNAME" ]; then echo "Missing DOCKERHUB_USERNAME (or DOCKER_USERNAME)"; exit 1; fi
+    - if [ -z "$DOCKERHUB_PASSWORD" ]; then echo "Missing DOCKERHUB_PASSWORD (or DOCKER_PASSWORD)"; exit 1; fi
     - echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-    - docker build -t "$DOCKERHUB_IMAGE:latest" -t "$DOCKERHUB_IMAGE:$CI_COMMIT_SHORT_SHA" webapp
+    - docker build -t "$DOCKERHUB_IMAGE:latest" -t "$DOCKERHUB_IMAGE:$CI_COMMIT_SHORT_SHA" .
     - docker push "$DOCKERHUB_IMAGE:latest"
     - docker push "$DOCKERHUB_IMAGE:$CI_COMMIT_SHORT_SHA"
   only:
@@ -82,3 +88,17 @@ prod_deploy:
     - main
     - master
   allow_failure: false
+
+mirror_github:
+  stage: mirror-github
+  image: alpine/git:2.45.2
+  before_script: []
+  script:
+    - git remote remove github || true
+    - git remote add github https://$GITHUB_USERNAME:$GITHUB_TOKEN@github.com/$GITHUB_USERNAME/Azure-Functions-Performance.git
+    - git fetch --prune --tags origin
+    - git push --force github HEAD:main
+    - git push --tags github
+  only:
+    - main
+    - master
