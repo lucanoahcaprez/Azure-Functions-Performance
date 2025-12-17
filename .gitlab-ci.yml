@@ -91,7 +91,9 @@ prod_deploy:
 
 mirror_github:
   stage: mirror-github
-  image: alpine/git:2.45.2
+  image:
+    name: alpine/git:latest
+    entrypoint: [""]
   before_script: []
   script:
     - git remote remove github || true
