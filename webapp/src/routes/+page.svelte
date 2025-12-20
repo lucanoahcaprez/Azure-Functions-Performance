@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte';
+  import { PUBLIC_USE_EXAMPLE_FUNCTIONS } from '$env/static/public';
 
   const STORAGE_KEY = 'functionBench.baseUrls.v2';
 
@@ -63,6 +64,7 @@
 
   const currentYear = new Date().getFullYear();
   const version = __PKG_VERSION__;
+  const useExampleFunctions = /^(1|true|yes)$/i.test(PUBLIC_USE_EXAMPLE_FUNCTIONS ?? '');
 
   let selectedRuntimeId = '';
   let selectedWorkloadId = '';
@@ -101,6 +103,35 @@
     }
   };
 
+  const normalizeUrlMap = (input) => {
+    if (!input || typeof input !== 'object') return null;
+    const normalized = {};
+    runtimeOptions.forEach((runtime) => {
+      const raw = input[runtime.id];
+      if (typeof raw === 'string') {
+        if (raw.trim()) normalized[runtime.id] = raw.trim();
+        return;
+      }
+      if (raw != null) {
+        const casted = String(raw).trim();
+        if (casted) normalized[runtime.id] = casted;
+      }
+    });
+    return Object.keys(normalized).length ? normalized : null;
+  };
+
+  const loadExampleUrls = async () => {
+    try {
+      const res = await fetch('/example-functions.json', { cache: 'no-store' });
+      if (!res.ok) return null;
+      const parsed = await res.json();
+      return normalizeUrlMap(parsed);
+    } catch (err) {
+      console.warn('Failed to load example functions', err);
+      return null;
+    }
+  };
+
   const buildWizardDefaults = () => {
     const draft = { ...urlMap };
     runtimeOptions.forEach((runtime) => {
@@ -111,10 +142,15 @@
     return draft;
   };
 
-  onMount(() => {
+  onMount(async () => {
     const stored = loadStoredUrls();
     if (stored) {
       urlMap = stored;
+    } else if (useExampleFunctions) {
+      const example = await loadExampleUrls();
+      if (example) {
+        urlMap = example;
+      }
     }
     wizardUrls = buildWizardDefaults();
     hasBootstrapped = true;

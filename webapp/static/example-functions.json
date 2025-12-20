@@ -1,0 +1,7 @@
+{
+  "dotnet": "https://dotnet-example.azurewebsites.net/api/DotnetFunction?code=REPLACE_WITH_FUNCTION_KEY",
+  "node": "https://node-example.azurewebsites.net/api/NodeFunction?code=REPLACE_WITH_FUNCTION_KEY",
+  "python": "https://python-example.azurewebsites.net/api/PythonFunction?code=REPLACE_WITH_FUNCTION_KEY",
+  "powershell": "https://powershell-example.azurewebsites.net/api/PowerShellFunction?code=REPLACE_WITH_FUNCTION_KEY",
+  "java": "https://java-example.azurewebsites.net/api/JavaFunction?code=REPLACE_WITH_FUNCTION_KEY"
+}
