@@ -53,7 +53,7 @@
     }
   },
   "variables": {
-    "storageName": "[substring(toLower(concat(parameters('namePrefix'), uniqueString(resourceGroup().id))), 0, 24)]",
+    "storageName": "[substring(toLower(concat(parameters('namePrefix'), uniqueString(resourceGroup().id), '000000000000000000000000')), 0, 24)]",
     "runtimeConfigs": [
       {
         "suffix": "dotnet",
