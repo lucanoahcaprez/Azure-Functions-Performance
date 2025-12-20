@@ -21,7 +21,7 @@ param packageUriPowerShell string = 'https://github.com/lucanoahcaprez/Azure-Fun
 @description('Zip package URI for the Java function app (optional).')
 param packageUriJava string = 'https://github.com/lucanoahcaprez/Azure-Functions-Performance/releases/latest/download/java.zip'
 
-var storageName = take(toLower('${namePrefix}${uniqueString(resourceGroup().id)}'), 24)
+var storageName = take(toLower('${namePrefix}${uniqueString(resourceGroup().id)}000000000000000000000000'), 24)
 
 var runtimeConfigs = [
   {
