@@ -1,6 +1,5 @@
 <script>
   import { onMount } from 'svelte';
-  import { PUBLIC_USE_EXAMPLE_FUNCTIONS } from '$env/static/public';
 
   const STORAGE_KEY = 'functionBench.baseUrls.v2';
 
@@ -64,7 +63,7 @@
 
   const currentYear = new Date().getFullYear();
   const version = __PKG_VERSION__;
-  const useExampleFunctions = /^(1|true|yes)$/i.test(PUBLIC_USE_EXAMPLE_FUNCTIONS ?? '');
+  const useExampleFunctions = /^(1|true|yes)$/i.test(import.meta.env.PUBLIC_USE_EXAMPLE_FUNCTIONS ?? '');
 
   let selectedRuntimeId = '';
   let selectedWorkloadId = '';
