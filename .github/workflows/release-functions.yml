@@ -1,0 +1,46 @@
+name: Release Functions Packages
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "functions-v*"
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+
+          make_zip() {
+            local runtime="$1"
+            local src_dir="$2"
+            local out="dist/${runtime}.zip"
+            local tmp
+            tmp="$(mktemp -d)"
+            cp deployment/host.json "${tmp}/host.json"
+            mkdir -p "${tmp}/${src_dir}"
+            cp -R "functions/${src_dir}/." "${tmp}/${src_dir}/"
+            (cd "${tmp}" && zip -r -q "${GITHUB_WORKSPACE}/${out}" .)
+            rm -rf "${tmp}"
+          }
+
+          make_zip dotnet DotnetFunction
+          make_zip node NodeFunction
+          make_zip python PythonFunction
+          make_zip powershell PowerShellFunction
+          make_zip java JavaFunction
+
+      - name: Publish release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.zip
