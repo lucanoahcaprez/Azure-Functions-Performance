@@ -1,13 +1,13 @@
 # Azure Functions deployment
 
-This repo ships an ARM/Bicep template that creates one Function App per runtime and (optionally) deploys each runtime's code from a zip package URI.
+This repo ships an ARM/Bicep template that creates one Function App per runtime and deploys each runtime's code from a zip package URI.
 
 ## Deploy to Azure (click-to-deploy)
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Flucanoahcaprez%2FAzure-Functions-Performance%2Fmain%2Fdeployment%2Fazuredeploy.json)
 
 ## What gets created
 - 1 storage account
-- 1 consumption plan (Y1)
+- 1 Flex Consumption plan (FC1, Linux)
 - 5 Function Apps: dotnet, node, python, powershell, java
 
 ## Deploying code
@@ -28,7 +28,7 @@ How it works:
    - `https://github.com/lucanoahcaprez/Azure-Functions-Performance/releases/latest/download/powershell.zip`
    - `https://github.com/lucanoahcaprez/Azure-Functions-Performance/releases/latest/download/java.zip`
 
-Note: The Java package is sourced from `functions/JavaFunction` and does not include compiled artifacts. For a runnable Java Function App, build with Maven and package the generated `target/azure-functions/<app>` folder instead.
+Note: The workflow builds Java with Maven and .NET with `dotnet publish`. The resulting release zips are ready for Flex Consumption.
 
 If you prefer, you can deploy code afterwards using Azure Functions Core Tools:
 ```sh
