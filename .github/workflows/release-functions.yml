@@ -25,10 +25,24 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+          cache: "maven"
+
       - name: Build packages
         shell: bash
         run: |
           set -euo pipefail
+          sudo apt-get update -y
+          sudo apt-get install -y zip
           mkdir -p dist
 
           make_zip() {
@@ -44,11 +58,21 @@ jobs:
             rm -rf "${tmp}"
           }
 
-          make_zip dotnet DotnetFunction
+          dotnet publish functions/DotnetFunction/DotnetFunction.csproj -c Release -o dist/dotnet
+          cp deployment/host.json dist/dotnet/host.json
+          (cd dist/dotnet && zip -r -q "../dotnet.zip" .)
+
           make_zip node NodeFunction
           make_zip python PythonFunction
           make_zip powershell PowerShellFunction
-          make_zip java JavaFunction
+
+          mvn -q -f functions/JavaFunction/pom.xml package
+          JAVA_PKG_DIR="$(ls -d functions/JavaFunction/target/azure-functions/* | head -n 1)"
+          if [ -z "${JAVA_PKG_DIR}" ]; then
+            echo "Java package not found under functions/JavaFunction/target/azure-functions"
+            exit 1
+          fi
+          (cd "${JAVA_PKG_DIR}" && zip -r -q "${GITHUB_WORKSPACE}/dist/java.zip" .)
 
       - name: Ensure release tag (manual runs)
         if: github.event_name == 'workflow_dispatch'

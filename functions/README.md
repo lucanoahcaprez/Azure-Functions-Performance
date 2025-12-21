@@ -6,8 +6,8 @@ This folder contains Azure Functions that implement the same workloads across mu
 - PowerShell: `functions/PowerShellFunction/run.ps1`
 - Node.js: `functions/NodeFunction/index.js`
 - Python: `functions/PythonFunction/__init__.py`
-- .NET (C# script): `functions/DotnetFunction/run.csx`
-- Java: `functions/JavaFunction/Function.java` (build with the standard Maven Azure Functions template; `function.json` is generated at build)
+- .NET (isolated): `functions/DotnetFunction/DotnetFunction.cs`
+- Java: `functions/JavaFunction/src/main/java/com/example/Function.java` (built with Maven; `function.json` is generated at build)
 
 ## Shared query parameters
 - `workload`: `cpu` | `io` | `delay`

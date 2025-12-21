@@ -142,14 +142,14 @@ resource functionApps 'Microsoft.Web/sites@2023-12-01' = [for runtime in runtime
           name: 'FUNCTIONS_EXTENSION_VERSION'
           value: '~4'
         }
-      ], runtime.packageUri != '' ? [
         {
           name: 'WEBSITE_RUN_FROM_PACKAGE'
           value: runtime.packageUri
         }
-      ] : [])
+      ])
     }
   }
 }]
+
 
 output functionAppNames array = [for runtime in runtimeConfigs: toLower('${namePrefix}-${runtime.suffix}')]

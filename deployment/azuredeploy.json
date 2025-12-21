@@ -176,7 +176,7 @@
           }
         },
         "siteConfig": {
-          "appSettings": "[concat(createArray(createObject('name', 'AzureWebJobsStorage', 'value', concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageName')), '2023-01-01').keys[0].value, ';EndpointSuffix=', environment().suffixes.storage)), createObject('name', 'FUNCTIONS_EXTENSION_VERSION', 'value', '~4')), if(not(empty(variables('runtimeConfigs')[copyIndex()].packageUri)), createArray(createObject('name', 'WEBSITE_RUN_FROM_PACKAGE', 'value', variables('runtimeConfigs')[copyIndex()].packageUri)), createArray()))]"
+          "appSettings": "[createArray(createObject('name', 'AzureWebJobsStorage', 'value', concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageName')), '2023-01-01').keys[0].value, ';EndpointSuffix=', environment().suffixes.storage)), createObject('name', 'FUNCTIONS_EXTENSION_VERSION', 'value', '~4'), createObject('name', 'WEBSITE_RUN_FROM_PACKAGE', 'value', variables('runtimeConfigs')[copyIndex()].packageUri))]"
         }
       },
       "copy": {
