@@ -11,7 +11,7 @@
     },
     "namePrefix": {
       "type": "string",
-      "defaultValue": "azfbench",
+      "defaultValue": "azfperf",
       "metadata": {
         "description": "Prefix for Function App names; runtime suffixes are appended."
       }
@@ -58,30 +58,45 @@
       {
         "suffix": "dotnet",
         "worker": "dotnet",
+        "runtimeName": "dotnet-isolated",
+        "runtimeVersion": "8.0",
+        "deployContainerName": "[take(concat(toLower(parameters('namePrefix')), '-dotnet-deploy'), 63)]",
         "packageUri": "[parameters('packageUriDotnet')]"
       },
       {
         "suffix": "node",
         "worker": "node",
+        "runtimeName": "node",
+        "runtimeVersion": "20",
+        "deployContainerName": "[take(concat(toLower(parameters('namePrefix')), '-node-deploy'), 63)]",
         "packageUri": "[parameters('packageUriNode')]"
       },
       {
         "suffix": "python",
         "worker": "python",
+        "runtimeName": "python",
+        "runtimeVersion": "3.11",
+        "deployContainerName": "[take(concat(toLower(parameters('namePrefix')), '-python-deploy'), 63)]",
         "packageUri": "[parameters('packageUriPython')]"
       },
       {
         "suffix": "powershell",
         "worker": "powershell",
+        "runtimeName": "powershell",
+        "runtimeVersion": "7.4",
+        "deployContainerName": "[take(concat(toLower(parameters('namePrefix')), '-powershell-deploy'), 63)]",
         "packageUri": "[parameters('packageUriPowerShell')]"
       },
       {
         "suffix": "java",
         "worker": "java",
+        "runtimeName": "java",
+        "runtimeVersion": "17",
+        "deployContainerName": "[take(concat(toLower(parameters('namePrefix')), '-java-deploy'), 63)]",
         "packageUri": "[parameters('packageUriJava')]"
       }
     ],
-    "storageConnectionString": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageName')), '2023-01-01').keys[0].value, ';EndpointSuffix=', environment().suffixes.storage)]"
+    "storageConnectionString": ""
   },
   "resources": [
     {
@@ -100,30 +115,68 @@
     },
     {
       "type": "Microsoft.Web/serverfarms",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2023-12-01",
       "name": "[concat(parameters('namePrefix'), '-plan')]",
       "location": "[parameters('location')]",
       "sku": {
-        "name": "Y1",
-        "tier": "Dynamic"
+        "name": "FC1",
+        "tier": "FlexConsumption"
       },
-      "properties": {}
+      "properties": {
+        "reserved": true
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+      "apiVersion": "2023-01-01",
+      "name": "[format('{0}/default/{1}', variables('storageName'), variables('runtimeConfigs')[copyIndex()].deployContainerName)]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]"
+      ],
+      "properties": {
+        "publicAccess": "None"
+      },
+      "copy": {
+        "name": "deployContainers",
+        "count": "[length(variables('runtimeConfigs'))]"
+      }
     },
     {
       "type": "Microsoft.Web/sites",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2023-12-01",
       "name": "[toLower(concat(parameters('namePrefix'), '-', variables('runtimeConfigs')[copyIndex()].suffix))]",
       "location": "[parameters('location')]",
-      "kind": "functionapp",
+      "kind": "functionapp,linux",
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]",
-        "[resourceId('Microsoft.Web/serverfarms', concat(parameters('namePrefix'), '-plan'))]"
+        "[resourceId('Microsoft.Web/serverfarms', concat(parameters('namePrefix'), '-plan'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices/containers', variables('storageName'), 'default', variables('runtimeConfigs')[copyIndex()].deployContainerName)]"
       ],
       "properties": {
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', concat(parameters('namePrefix'), '-plan'))]",
         "httpsOnly": true,
+        "functionAppConfig": {
+          "runtime": {
+            "name": "[variables('runtimeConfigs')[copyIndex()].runtimeName]",
+            "version": "[variables('runtimeConfigs')[copyIndex()].runtimeVersion]"
+          },
+          "scaleAndConcurrency": {
+            "instanceMemoryMB": 2048,
+            "maximumInstanceCount": 40
+          },
+          "deployment": {
+            "storage": {
+              "type": "blobContainer",
+              "value": "[concat('https://', variables('storageName'), '.blob.', environment().suffixes.storage, '/', variables('runtimeConfigs')[copyIndex()].deployContainerName)]",
+              "authentication": {
+                "type": "StorageAccountConnectionString",
+                "storageAccountConnectionStringName": "AzureWebJobsStorage"
+              }
+            }
+          }
+        },
         "siteConfig": {
-          "appSettings": "[concat(createArray(createObject('name', 'AzureWebJobsStorage', 'value', variables('storageConnectionString')), createObject('name', 'FUNCTIONS_EXTENSION_VERSION', 'value', '~4'), createObject('name', 'FUNCTIONS_WORKER_RUNTIME', 'value', variables('runtimeConfigs')[copyIndex()].worker), createObject('name', 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING', 'value', variables('storageConnectionString')), createObject('name', 'WEBSITE_CONTENTSHARE', 'value', substring(concat(toLower(concat(parameters('namePrefix'), '-', variables('runtimeConfigs')[copyIndex()].suffix)), '-content'), 0, 63))), if(not(empty(variables('runtimeConfigs')[copyIndex()].packageUri)), createArray(createObject('name', 'WEBSITE_RUN_FROM_PACKAGE', 'value', variables('runtimeConfigs')[copyIndex()].packageUri)), createArray()))]"
+          "appSettings": "[concat(createArray(createObject('name', 'AzureWebJobsStorage', 'value', concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageName')), '2023-01-01').keys[0].value, ';EndpointSuffix=', environment().suffixes.storage)), createObject('name', 'FUNCTIONS_EXTENSION_VERSION', 'value', '~4')), if(not(empty(variables('runtimeConfigs')[copyIndex()].packageUri)), createArray(createObject('name', 'WEBSITE_RUN_FROM_PACKAGE', 'value', variables('runtimeConfigs')[copyIndex()].packageUri)), createArray()))]"
         }
       },
       "copy": {
@@ -135,7 +188,7 @@
   "outputs": {
     "functionAppNames": {
       "type": "array",
-      "value": "[createArray(toLower(concat(parameters('namePrefix'), '-dotnet')), toLower(concat(parameters('namePrefix'), '-node')), toLower(concat(parameters('namePrefix'), '-python')), toLower(concat(parameters('namePrefix'), '-powershell')), toLower(concat(parameters('namePrefix'), '-java')))]"
+      "value": "[createArray(toLower(concat(parameters('namePrefix'), 'dotnet')), toLower(concat(parameters('namePrefix'), 'node')), toLower(concat(parameters('namePrefix'), 'python')), toLower(concat(parameters('namePrefix'), 'powershell')), toLower(concat(parameters('namePrefix'), 'java')))]"
     }
   }
 }

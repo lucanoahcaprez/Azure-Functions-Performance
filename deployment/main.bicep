@@ -4,7 +4,7 @@ targetScope = 'resourceGroup'
 param location string = resourceGroup().location
 
 @description('Prefix for Function App names; runtime suffixes are appended.')
-param namePrefix string = 'azfbench'
+param namePrefix string = 'azfperf'
 
 @description('Zip package URI for the .NET function app (optional).')
 param packageUriDotnet string = 'https://github.com/lucanoahcaprez/Azure-Functions-Performance/releases/latest/download/dotnet.zip'
@@ -28,30 +28,45 @@ var runtimeConfigs = [
     id: 'dotnet'
     suffix: 'dotnet'
     worker: 'dotnet'
+    runtimeName: 'dotnet-isolated'
+    runtimeVersion: '8.0'
+    deployContainerName: take('${toLower(namePrefix)}-dotnet-deploy', 63)
     packageUri: packageUriDotnet
   }
   {
     id: 'node'
     suffix: 'node'
     worker: 'node'
+    runtimeName: 'node'
+    runtimeVersion: '20'
+    deployContainerName: take('${toLower(namePrefix)}-node-deploy', 63)
     packageUri: packageUriNode
   }
   {
     id: 'python'
     suffix: 'python'
     worker: 'python'
+    runtimeName: 'python'
+    runtimeVersion: '3.11'
+    deployContainerName: take('${toLower(namePrefix)}-python-deploy', 63)
     packageUri: packageUriPython
   }
   {
     id: 'powershell'
     suffix: 'powershell'
     worker: 'powershell'
+    runtimeName: 'powershell'
+    runtimeVersion: '7.4'
+    deployContainerName: take('${toLower(namePrefix)}-powershell-deploy', 63)
     packageUri: packageUriPowerShell
   }
   {
     id: 'java'
     suffix: 'java'
     worker: 'java'
+    runtimeName: 'java'
+    runtimeVersion: '17'
+    deployContainerName: take('${toLower(namePrefix)}-java-deploy', 63)
     packageUri: packageUriJava
   }
 ]
@@ -69,26 +84,54 @@ resource storage 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   }
 }
 
-resource plan 'Microsoft.Web/serverfarms@2022-09-01' = {
+resource plan 'Microsoft.Web/serverfarms@2023-12-01' = {
   name: '${namePrefix}-plan'
   location: location
   sku: {
-    name: 'Y1'
-    tier: 'Dynamic'
+    name: 'FC1'
+    tier: 'FlexConsumption'
   }
-  properties: {}
+  properties: {
+    reserved: true
+  }
 }
 
 var storageKey = listKeys(storage.id, storage.apiVersion).keys[0].value
 var storageConnectionString = 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storageKey};EndpointSuffix=${environment().suffixes.storage}'
+resource deployContainers 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = [for runtime in runtimeConfigs: {
+  name: '${storage.name}/default/${runtime.deployContainerName}'
+  properties: {
+    publicAccess: 'None'
+  }
+}]
 
-resource functionApps 'Microsoft.Web/sites@2022-09-01' = [for runtime in runtimeConfigs: {
+resource functionApps 'Microsoft.Web/sites@2023-12-01' = [for runtime in runtimeConfigs: {
   name: toLower('${namePrefix}-${runtime.suffix}')
   location: location
-  kind: 'functionapp'
+  kind: 'functionapp,linux'
   properties: {
     serverFarmId: plan.id
     httpsOnly: true
+    functionAppConfig: {
+      runtime: {
+        name: runtime.runtimeName
+        version: runtime.runtimeVersion
+      }
+      scaleAndConcurrency: {
+        instanceMemoryMB: 2048
+        maximumInstanceCount: 40
+      }
+      deployment: {
+        storage: {
+          type: 'blobContainer'
+          value: 'https://${storage.name}.blob.${environment().suffixes.storage}/${runtime.deployContainerName}'
+          authentication: {
+            type: 'StorageAccountConnectionString'
+            storageAccountConnectionStringName: 'AzureWebJobsStorage'
+          }
+        }
+      }
+    }
     siteConfig: {
       appSettings: concat([
         {
@@ -98,18 +141,6 @@ resource functionApps 'Microsoft.Web/sites@2022-09-01' = [for runtime in runtime
         {
           name: 'FUNCTIONS_EXTENSION_VERSION'
           value: '~4'
-        }
-        {
-          name: 'FUNCTIONS_WORKER_RUNTIME'
-          value: runtime.worker
-        }
-        {
-          name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'
-          value: storageConnectionString
-        }
-        {
-          name: 'WEBSITE_CONTENTSHARE'
-          value: take('${toLower(namePrefix)}-${runtime.suffix}-content', 63)
         }
       ], runtime.packageUri != '' ? [
         {
