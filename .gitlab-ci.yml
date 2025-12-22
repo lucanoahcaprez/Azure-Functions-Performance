@@ -76,7 +76,7 @@ mirror_github:
     - git remote remove github || true
     - git remote add github https://$GITHUB_USERNAME:$GITHUB_TOKEN@github.com/$GITHUB_USERNAME/Azure-Functions-Performance.git
     - git fetch --prune --tags origin
-    - rm -rf .github/workflows
+    - git filter-branch -f --prune-empty --index-filter "git rm -r --cached --ignore-unmatch .github/workflows" --tag-name-filter cat -- --all
     - git push --force github HEAD:main
     - git push --force --tags github
   only:
