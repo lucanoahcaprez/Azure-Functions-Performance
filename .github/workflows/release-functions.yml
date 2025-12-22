@@ -58,7 +58,9 @@ jobs:
             rm -rf "${tmp}"
           }
 
-          dotnet publish functions/DotnetFunction/DotnetFunction.csproj -c Release -o dist/dotnet
+          pushd functions/DotnetFunction > /dev/null
+          dotnet publish -c Release -o "${GITHUB_WORKSPACE}/dist/dotnet"
+          popd > /dev/null
           cp deployment/host.json dist/dotnet/host.json
           (cd dist/dotnet && zip -r -q "../dotnet.zip" .)
 
