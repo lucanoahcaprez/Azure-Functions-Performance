@@ -77,13 +77,13 @@ jobs:
           make_zip python PythonFunction
           make_zip powershell PowerShellFunction
 
-          mvn -q -f functions/JavaFunction/pom.xml package
-          JAVA_PKG_DIR="$(ls -d functions/JavaFunction/target/azure-functions/* | head -n 1)"
-          if [ -z "${JAVA_PKG_DIR}" ]; then
-            echo "Java package not found under functions/JavaFunction/target/azure-functions"
-            exit 1
-          fi
-          (cd "${JAVA_PKG_DIR}" && zip -r -q "${GITHUB_WORKSPACE}/dist/java.zip" .)
+          # mvn -q -f functions/JavaFunction/pom.xml package
+          # JAVA_PKG_DIR="$(ls -d functions/JavaFunction/target/azure-functions/* | head -n 1)"
+          # if [ -z "${JAVA_PKG_DIR}" ]; then
+          #   echo "Java package not found under functions/JavaFunction/target/azure-functions"
+          #   exit 1
+          # fi
+          # (cd "${JAVA_PKG_DIR}" && zip -r -q "${GITHUB_WORKSPACE}/dist/java.zip" .)
 
       - name: Ensure release tag (manual runs)
         if: github.event_name == 'workflow_dispatch'
