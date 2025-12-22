@@ -50,7 +50,8 @@ jobs:
         working-directory: functions/DotnetFunction
         run: |
           set -euo pipefail
-          dotnet publish -c Release -o "${GITHUB_WORKSPACE}/dist/dotnet"
+          dotnet restore ./DotnetFunction.csproj
+          dotnet msbuild ./DotnetFunction.csproj /t:Publish /p:Configuration=Release /p:PublishDir="${GITHUB_WORKSPACE}/dist/dotnet" /noautoresponse
           cp "${GITHUB_WORKSPACE}/deployment/host.json" "${GITHUB_WORKSPACE}/dist/dotnet/host.json"
           (cd "${GITHUB_WORKSPACE}/dist/dotnet" && zip -r -q "${GITHUB_WORKSPACE}/dist/dotnet.zip" .)
 
