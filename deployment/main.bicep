@@ -32,6 +32,7 @@ var runtimeConfigs = [
     runtimeVersion: '8.0'
     deployContainerName: take('${toLower(namePrefix)}-dotnet-deploy', 63)
     packageUri: packageUriDotnet
+    linuxFxVersion: 'DOTNET|8.0'
   }
   {
     id: 'node'
@@ -41,6 +42,7 @@ var runtimeConfigs = [
     runtimeVersion: '20'
     deployContainerName: take('${toLower(namePrefix)}-node-deploy', 63)
     packageUri: packageUriNode
+    linuxFxVersion: 'NODE|20'
   }
   {
     id: 'python'
@@ -50,6 +52,7 @@ var runtimeConfigs = [
     runtimeVersion: '3.11'
     deployContainerName: take('${toLower(namePrefix)}-python-deploy', 63)
     packageUri: packageUriPython
+    linuxFxVersion: 'PYTHON|3.11'
   }
   {
     id: 'powershell'
@@ -59,6 +62,7 @@ var runtimeConfigs = [
     runtimeVersion: '7.4'
     deployContainerName: take('${toLower(namePrefix)}-powershell-deploy', 63)
     packageUri: packageUriPowerShell
+    linuxFxVersion: 'POWERSHELL|7.2'
   }
   {
     id: 'java'
@@ -68,6 +72,7 @@ var runtimeConfigs = [
     runtimeVersion: '17'
     deployContainerName: take('${toLower(namePrefix)}-java-deploy', 63)
     packageUri: packageUriJava
+    linuxFxVersion: 'JAVA|17'
   }
 ]
 
@@ -88,8 +93,8 @@ resource plan 'Microsoft.Web/serverfarms@2023-12-01' = {
   name: '${namePrefix}-plan'
   location: location
   sku: {
-    name: 'FC1'
-    tier: 'FlexConsumption'
+    name: 'Y1'
+    tier: 'Dynamic'
   }
   properties: {
     reserved: true
@@ -98,12 +103,6 @@ resource plan 'Microsoft.Web/serverfarms@2023-12-01' = {
 
 var storageKey = listKeys(storage.id, storage.apiVersion).keys[0].value
 var storageConnectionString = 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storageKey};EndpointSuffix=${environment().suffixes.storage}'
-resource deployContainers 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = [for runtime in runtimeConfigs: {
-  name: '${storage.name}/default/${runtime.deployContainerName}'
-  properties: {
-    publicAccess: 'None'
-  }
-}]
 
 resource functionApps 'Microsoft.Web/sites@2023-12-01' = [for runtime in runtimeConfigs: {
   name: toLower('${namePrefix}-${runtime.suffix}')
@@ -112,27 +111,8 @@ resource functionApps 'Microsoft.Web/sites@2023-12-01' = [for runtime in runtime
   properties: {
     serverFarmId: plan.id
     httpsOnly: true
-    functionAppConfig: {
-      runtime: {
-        name: runtime.runtimeName
-        version: runtime.runtimeVersion
-      }
-      scaleAndConcurrency: {
-        instanceMemoryMB: 2048
-        maximumInstanceCount: 40
-      }
-      deployment: {
-        storage: {
-          type: 'blobContainer'
-          value: 'https://${storage.name}.blob.${environment().suffixes.storage}/${runtime.deployContainerName}'
-          authentication: {
-            type: 'StorageAccountConnectionString'
-            storageAccountConnectionStringName: 'AzureWebJobsStorage'
-          }
-        }
-      }
-    }
     siteConfig: {
+      linuxFxVersion: runtime.linuxFxVersion
       appSettings: concat([
         {
           name: 'AzureWebJobsStorage'
@@ -141,6 +121,18 @@ resource functionApps 'Microsoft.Web/sites@2023-12-01' = [for runtime in runtime
         {
           name: 'FUNCTIONS_EXTENSION_VERSION'
           value: '~4'
+        }
+        {
+          name: 'FUNCTIONS_WORKER_RUNTIME'
+          value: runtime.worker
+        }
+        {
+          name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'
+          value: storageConnectionString
+        }
+        {
+          name: 'WEBSITE_CONTENTSHARE'
+          value: take('${toLower(namePrefix)}-${runtime.suffix}-content', 63)
         }
         {
           name: 'WEBSITE_RUN_FROM_PACKAGE'

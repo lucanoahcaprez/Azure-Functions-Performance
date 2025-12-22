@@ -7,7 +7,7 @@ This repo ships an ARM/Bicep template that creates one Function App per runtime 
 
 ## What gets created
 - 1 storage account
-- 1 Flex Consumption plan (FC1, Linux)
+- 1 Consumption plan (Y1, Linux)
 - 5 Function Apps: dotnet, node, python, powershell, java
 
 ## Deploying code
