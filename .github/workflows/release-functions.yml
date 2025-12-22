@@ -37,13 +37,27 @@ jobs:
           java-version: "17"
           cache: "maven"
 
-      - name: Build packages
+      - name: Prepare dist
         shell: bash
         run: |
           set -euo pipefail
           sudo apt-get update -y
           sudo apt-get install -y zip
           mkdir -p dist
+
+      - name: Build .NET package
+        shell: bash
+        working-directory: functions/DotnetFunction
+        run: |
+          set -euo pipefail
+          dotnet publish ./DotnetFunction.csproj -c Release -o "${GITHUB_WORKSPACE}/dist/dotnet"
+          cp "${GITHUB_WORKSPACE}/deployment/host.json" "${GITHUB_WORKSPACE}/dist/dotnet/host.json"
+          (cd "${GITHUB_WORKSPACE}/dist/dotnet" && zip -r -q "${GITHUB_WORKSPACE}/dist/dotnet.zip" .)
+
+      - name: Build runtime packages
+        shell: bash
+        run: |
+          set -euo pipefail
 
           make_zip() {
             local runtime="$1"
@@ -57,12 +71,6 @@ jobs:
             (cd "${tmp}" && zip -r -q "${GITHUB_WORKSPACE}/${out}" .)
             rm -rf "${tmp}"
           }
-
-          pushd functions/DotnetFunction > /dev/null
-          dotnet publish -c Release -o "${GITHUB_WORKSPACE}/dist/dotnet"
-          popd > /dev/null
-          cp deployment/host.json dist/dotnet/host.json
-          (cd dist/dotnet && zip -r -q "../dotnet.zip" .)
 
           make_zip node NodeFunction
           make_zip python PythonFunction
