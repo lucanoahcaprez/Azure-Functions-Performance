@@ -1,10 +1,13 @@
 {
+  "scriptFile": "__init__.py",
+  "entryPoint": "main",
   "bindings": [
     {
       "authLevel": "function",
       "type": "httpTrigger",
       "direction": "in",
       "name": "req",
+      "route": "PythonFunction",
       "methods": [
         "get",
         "post"
