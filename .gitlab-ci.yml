@@ -18,6 +18,8 @@ before_script:
 
 build:
   stage: build
+  variables:
+    PUBLIC_USE_EXAMPLE_FUNCTIONS: "1"
   script:
     - pnpm build
   artifacts:

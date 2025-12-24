@@ -16,20 +16,6 @@
         "description": "Prefix for Function App names; runtime suffixes are appended."
       }
     },
-    "hostingPlanNameWindows": {
-      "type": "string",
-      "defaultValue": "[format('{0}-plan-win', parameters('namePrefix'))]",
-      "metadata": {
-        "description": "Windows Consumption plan for Node, Python, and PowerShell."
-      }
-    },
-    "hostingPlanNamePythonFlex": {
-      "type": "string",
-      "defaultValue": "[format('{0}-plan-flex', parameters('namePrefix'))]",
-      "metadata": {
-        "description": "Linux Flex Consumption plan for the Python function app."
-      }
-    },
     "storageAccountName": {
       "type": "string",
       "defaultValue": "[toLower(take(format('st{0}', uniqueString(resourceGroup().id)), 24))]",
@@ -82,51 +68,39 @@
       "metadata": {
         "description": "Host function key value used for all function apps."
       }
-    },
-    "packageUriNode": {
-      "type": "secureString",
-      "defaultValue": "https://github.com/lucanoahcaprez/Azure-Functions-Performance/releases/latest/download/node.zip",
-      "metadata": {
-        "description": "Zip package URI for the Node.js function app."
-      }
-    },
-    "packageUriPython": {
-      "type": "secureString",
-      "defaultValue": "https://github.com/lucanoahcaprez/Azure-Functions-Performance/releases/latest/download/python.zip",
-      "metadata": {
-        "description": "Zip package URI for the Python function app."
-      }
-    },
-    "packageUriPowerShell": {
-      "type": "secureString",
-      "defaultValue": "https://github.com/lucanoahcaprez/Azure-Functions-Performance/releases/latest/download/powershell.zip",
-      "metadata": {
-        "description": "Zip package URI for the PowerShell function app."
-      }
     }
   },
   "variables": {
     "location": "[parameters('location')]",
     "workspaceResourceId": "[format('/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.OperationalInsights/workspaces/{2}', parameters('subscriptionId'), parameters('resourceGroupName'), parameters('logAnalyticsWorkspaceName'))]",
-    "pythonDeployContainerName": "[take(format('{0}-python-deploy', toLower(parameters('namePrefix'))), 63)]",
-    "windowsRuntimes": [
+    "flexRuntimes": [
       {
-        "suffix": "node",
-        "worker": "node",
-        "packageUri": "[parameters('packageUriNode')]"
+        "suffix": "powershell",
+        "runtimeName": "powerShell",
+        "runtimeVersion": "7.4"
       },
       {
-        "suffix": "powershell",
-        "worker": "powershell",
-        "packageUri": "[parameters('packageUriPowerShell')]"
+        "suffix": "dotnet",
+        "runtimeName": "dotnet-isolated",
+        "runtimeVersion": "8.0"
+      },
+      {
+        "suffix": "java",
+        "runtimeName": "java",
+        "runtimeVersion": "17"
+      },
+      {
+        "suffix": "node",
+        "runtimeName": "node",
+        "runtimeVersion": "20"
+      },
+      {
+        "suffix": "python",
+        "runtimeName": "python",
+        "runtimeVersion": "3.11"
       }
     ],
-    "zipDeployRuntimes": [
-      {
-        "suffix": "powershell",
-        "packageUri": "[parameters('packageUriPowerShell')]"
-      }
-    ]
+    "deploymentStorageContainerName": "[toLower(format('app-packages-{0}', take(parameters('storageAccountName'), 20)))]"
   },
   "resources": [
     {
@@ -145,21 +119,8 @@
     },
     {
       "type": "Microsoft.Web/serverfarms",
-      "apiVersion": "2022-03-01",
-      "name": "[parameters('hostingPlanNameWindows')]",
-      "location": "[variables('location')]",
-      "sku": {
-        "tier": "Dynamic",
-        "name": "Y1"
-      },
-      "properties": {
-        "computeMode": "Dynamic"
-      }
-    },
-    {
-      "type": "Microsoft.Web/serverfarms",
       "apiVersion": "2023-12-01",
-      "name": "[parameters('hostingPlanNamePythonFlex')]",
+      "name": "[format('{0}-plan-{1}-flex', parameters('namePrefix'), variables('flexRuntimes')[copyIndex()].suffix)]",
       "location": "[variables('location')]",
       "sku": {
         "name": "FC1",
@@ -167,26 +128,19 @@
       },
       "properties": {
         "reserved": true
-      }
-    },
-    {
-      "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
-      "apiVersion": "2023-01-01",
-      "name": "[format('{0}/default/{1}', parameters('storageAccountName'), variables('pythonDeployContainerName'))]",
-      "dependsOn": [
-        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
-      ],
-      "properties": {
-        "publicAccess": "None"
+      },
+      "copy": {
+        "name": "flexPlans",
+        "count": "[length(variables('flexRuntimes'))]"
       }
     },
     {
       "type": "Microsoft.Insights/components",
       "apiVersion": "2020-02-02",
-      "name": "[format('{0}-{1}-ai', parameters('namePrefix'), variables('windowsRuntimes')[copyIndex()].suffix)]",
+      "name": "[format('{0}-{1}-ai', parameters('namePrefix'), variables('flexRuntimes')[copyIndex()].suffix)]",
       "location": "[variables('location')]",
       "tags": {
-        "[format('hidden-link:{0}', resourceId('Microsoft.Web/sites', toLower(format('{0}-{1}', parameters('namePrefix'), variables('windowsRuntimes')[copyIndex()].suffix))))]": "Resource"
+        "[format('hidden-link:{0}', resourceId('Microsoft.Web/sites', toLower(format('{0}-{1}', parameters('namePrefix'), variables('flexRuntimes')[copyIndex()].suffix))))]": "Resource"
       },
       "kind": "web",
       "properties": {
@@ -194,71 +148,30 @@
         "WorkspaceResourceId": "[variables('workspaceResourceId')]"
       },
       "copy": {
-        "name": "windowsInsights",
-        "count": "[length(variables('windowsRuntimes'))]"
-      }
-    },
-    {
-      "type": "Microsoft.Insights/components",
-      "apiVersion": "2020-02-02",
-      "name": "[format('{0}-python-ai', parameters('namePrefix'))]",
-      "location": "[variables('location')]",
-      "tags": {
-        "[format('hidden-link:{0}', resourceId('Microsoft.Web/sites', toLower(format('{0}-python', parameters('namePrefix')))))]": "Resource"
-      },
-      "kind": "web",
-      "properties": {
-        "Application_Type": "web",
-        "WorkspaceResourceId": "[variables('workspaceResourceId')]"
+        "name": "flexInsights",
+        "count": "[length(variables('flexRuntimes'))]"
       }
     },
     {
       "type": "Microsoft.Web/sites",
-      "apiVersion": "2022-03-01",
-      "name": "[toLower(format('{0}-{1}', parameters('namePrefix'), variables('windowsRuntimes')[copyIndex()].suffix))]",
-      "location": "[variables('location')]",
-      "kind": "functionapp",
-      "dependsOn": [
-        "[resourceId('Microsoft.Insights/components', format('{0}-{1}-ai', parameters('namePrefix'), variables('windowsRuntimes')[copyIndex()].suffix))]",
-        "[resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanNameWindows'))]",
-        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
-      ],
-      "properties": {
-        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanNameWindows'))]",
-        "httpsOnly": true,
-        "siteConfig": {
-          "cors": {
-            "allowedOrigins": [
-              "https://portal.azure.com"
-            ]
-          },
-          "appSettings": "[concat(createArray(createObject('name', 'AzureWebJobsStorage', 'value', format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', parameters('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2021-09-01').keys[0].value)), createObject('name', 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING', 'value', format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', parameters('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2021-09-01').keys[0].value)), createObject('name', 'WEBSITE_CONTENTSHARE', 'value', take(format('{0}-{1}-content', toLower(parameters('namePrefix')), variables('windowsRuntimes')[copyIndex()].suffix), 63)), createObject('name', 'APPINSIGHTS_INSTRUMENTATIONKEY', 'value', reference(resourceId('Microsoft.Insights/components', format('{0}-{1}-ai', parameters('namePrefix'), variables('windowsRuntimes')[copyIndex()].suffix)), '2020-02-02').InstrumentationKey), createObject('name', 'FUNCTIONS_EXTENSION_VERSION', 'value', '~4'), createObject('name', 'FUNCTIONS_WORKER_RUNTIME', 'value', variables('windowsRuntimes')[copyIndex()].worker)), if(equals(variables('windowsRuntimes')[copyIndex()].suffix, 'node'), createArray(createObject('name', 'WEBSITE_NODE_DEFAULT_VERSION', 'value', '~20')), createArray()), if(and(equals(variables('windowsRuntimes')[copyIndex()].suffix, 'node'), not(empty(parameters('packageUriNode')))), createArray(createObject('name', 'WEBSITE_RUN_FROM_PACKAGE', 'value', parameters('packageUriNode')), createObject('name', 'SCM_DO_BUILD_DURING_DEPLOYMENT', 'value', 'false')), createArray()))]"
-        }
-      },
-      "copy": {
-        "name": "windowsApps",
-        "count": "[length(variables('windowsRuntimes'))]"
-      }
-    },
-    {
-      "type": "Microsoft.Web/sites",
-      "apiVersion": "2023-12-01",
-      "name": "[toLower(format('{0}-python', parameters('namePrefix')))]",
+      "apiVersion": "2024-04-01",
+      "name": "[toLower(format('{0}-{1}', parameters('namePrefix'), variables('flexRuntimes')[copyIndex()].suffix))]",
       "location": "[variables('location')]",
       "kind": "functionapp,linux",
       "dependsOn": [
-        "[resourceId('Microsoft.Insights/components', format('{0}-python-ai', parameters('namePrefix')))]",
-        "[resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanNamePythonFlex'))]",
+        "[resourceId('Microsoft.Insights/components', format('{0}-{1}-ai', parameters('namePrefix'), variables('flexRuntimes')[copyIndex()].suffix))]",
+        "[resourceId('Microsoft.Web/serverfarms', format('{0}-plan-{1}-flex', parameters('namePrefix'), variables('flexRuntimes')[copyIndex()].suffix))]",
         "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]",
-        "[resourceId('Microsoft.Storage/storageAccounts/blobServices/containers', parameters('storageAccountName'), 'default', variables('pythonDeployContainerName'))]"
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices/containers', parameters('storageAccountName'), 'default', variables('deploymentStorageContainerName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccountName'), 'default')]"
       ],
       "properties": {
-        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanNamePythonFlex'))]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', format('{0}-plan-{1}-flex', parameters('namePrefix'), variables('flexRuntimes')[copyIndex()].suffix))]",
         "httpsOnly": true,
         "functionAppConfig": {
           "runtime": {
-            "name": "python",
-            "version": "3.11"
+            "name": "[variables('flexRuntimes')[copyIndex()].runtimeName]",
+            "version": "[variables('flexRuntimes')[copyIndex()].runtimeVersion]"
           },
           "scaleAndConcurrency": {
             "instanceMemoryMB": 2048,
@@ -267,7 +180,7 @@
           "deployment": {
             "storage": {
               "type": "blobContainer",
-              "value": "[concat('https://', parameters('storageAccountName'), '.blob.', environment().suffixes.storage, '/', variables('pythonDeployContainerName'))]",
+              "value": "[format('{0}{1}', reference(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2023-05-01').primaryEndpoints.blob, variables('deploymentStorageContainerName'))]",
               "authentication": {
                 "type": "StorageAccountConnectionString",
                 "storageAccountConnectionStringName": "AzureWebJobsStorage"
@@ -283,78 +196,72 @@
           },
           "appSettings": [
             {
+              "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+              "value": "[reference(resourceId('Microsoft.Insights/components', format('{0}-{1}-ai', parameters('namePrefix'), variables('flexRuntimes')[copyIndex()].suffix)), '2020-02-02').ConnectionString]"
+            },
+            {
               "name": "AzureWebJobsStorage",
               "value": "[format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', parameters('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2021-09-01').keys[0].value)]"
             },
             {
-              "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-              "value": "[reference(resourceId('Microsoft.Insights/components', format('{0}-python-ai', parameters('namePrefix'))), '2020-02-02').InstrumentationKey]"
-            },
-            {
               "name": "FUNCTIONS_EXTENSION_VERSION",
               "value": "~4"
-            },
-            {
-              "name": "WEBSITE_RUN_FROM_PACKAGE",
-              "value": "[parameters('packageUriPython')]"
             }
           ]
         }
-      }
-    },
-    {
-      "type": "Microsoft.Web/sites/extensions",
-      "apiVersion": "2022-03-01",
-      "name": "[format('{0}/{1}', toLower(format('{0}-{1}', parameters('namePrefix'), variables('zipDeployRuntimes')[copyIndex()].suffix)), 'zipdeploy')]",
-      "dependsOn": [
-        "[resourceId('Microsoft.Web/sites', toLower(format('{0}-{1}', parameters('namePrefix'), variables('zipDeployRuntimes')[copyIndex()].suffix)))]"
-      ],
-      "properties": {
-        "packageUri": "[variables('zipDeployRuntimes')[copyIndex()].packageUri]",
-        "appOffline": true
       },
       "copy": {
-        "name": "zipDeploy",
-        "count": "[length(variables('zipDeployRuntimes'))]"
-      }
-    },
-    {
-      "type": "Microsoft.Web/sites/host/functionKeys",
-      "apiVersion": "2022-03-01",
-      "name": "[format('{0}/default/{1}', toLower(format('{0}-{1}', parameters('namePrefix'), variables('windowsRuntimes')[copyIndex()].suffix)), parameters('hostFunctionKeyName'))]",
-      "properties": {
-        "name": "[parameters('hostFunctionKeyName')]",
-        "value": "[parameters('hostFunctionKeyValue')]"
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Web/sites', toLower(format('{0}-{1}', parameters('namePrefix'), variables('windowsRuntimes')[copyIndex()].suffix)))]"
-      ],
-      "copy": {
-        "name": "windowsKeys",
-        "count": "[length(variables('windowsRuntimes'))]"
+        "name": "flexApps",
+        "count": "[length(variables('flexRuntimes'))]"
       }
     },
     {
       "type": "Microsoft.Web/sites/host/functionKeys",
       "apiVersion": "2023-12-01",
-      "name": "[format('{0}/default/{1}', toLower(format('{0}-python', parameters('namePrefix'))), parameters('hostFunctionKeyName'))]",
+      "name": "[format('{0}/default/{1}', toLower(format('{0}-{1}', parameters('namePrefix'), variables('flexRuntimes')[copyIndex()].suffix)), parameters('hostFunctionKeyName'))]",
       "properties": {
         "name": "[parameters('hostFunctionKeyName')]",
         "value": "[parameters('hostFunctionKeyValue')]"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Web/sites', toLower(format('{0}-python', parameters('namePrefix'))))]"
-      ]
+        "[resourceId('Microsoft.Web/sites', toLower(format('{0}-{1}', parameters('namePrefix'), variables('flexRuntimes')[copyIndex()].suffix)))]"
+      ],
+      "copy": {
+        "name": "flexKeys",
+        "count": "[length(variables('flexRuntimes'))]"
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices",
+      "apiVersion": "2023-05-01",
+      "name": "[format('{0}/{1}', parameters('storageAccountName'), 'default')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+      ],
+      "properties": {
+        "deleteRetentionPolicy": {}
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+      "apiVersion": "2023-05-01",
+      "name": "[format('{0}/{1}/{2}', parameters('storageAccountName'), 'default', variables('deploymentStorageContainerName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccountName'), 'default')]"
+      ],
+      "properties": {
+        "publicAccess": "None"
+      }
     }
   ],
   "outputs": {
     "functionAppNames": {
       "type": "array",
-      "value": "[createArray(toLower(format('{0}-node', parameters('namePrefix'))), toLower(format('{0}-python', parameters('namePrefix'))), toLower(format('{0}-powershell', parameters('namePrefix'))))]"
+      "value": "[createArray(toLower(format('{0}-powershell', parameters('namePrefix'))), toLower(format('{0}-dotnet', parameters('namePrefix'))), toLower(format('{0}-java', parameters('namePrefix'))), toLower(format('{0}-node', parameters('namePrefix'))), toLower(format('{0}-python', parameters('namePrefix'))))]"
     },
     "appInsightsNames": {
       "type": "array",
-      "value": "[createArray(format('{0}-node-ai', parameters('namePrefix')), format('{0}-python-ai', parameters('namePrefix')), format('{0}-powershell-ai', parameters('namePrefix')))]"
+      "value": "[createArray(format('{0}-powershell-ai', parameters('namePrefix')), format('{0}-dotnet-ai', parameters('namePrefix')), format('{0}-java-ai', parameters('namePrefix')), format('{0}-node-ai', parameters('namePrefix')), format('{0}-python-ai', parameters('namePrefix')))]"
     }
   }
 }

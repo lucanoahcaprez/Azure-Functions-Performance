@@ -1,7 +1,7 @@
 {
   "dotnet": "https://dotnet-example.azurewebsites.net/api/DotnetFunction?code=REPLACE_WITH_FUNCTION_KEY",
-  "node": "https://node-example.azurewebsites.net/api/NodeFunction?code=REPLACE_WITH_FUNCTION_KEY",
-  "python": "https://python-example.azurewebsites.net/api/PythonFunction?code=REPLACE_WITH_FUNCTION_KEY",
-  "powershell": "https://powershell-example.azurewebsites.net/api/PowerShellFunction?code=REPLACE_WITH_FUNCTION_KEY",
+  "node": "https://func-bfh-azfperf-node-test-01.azurewebsites.net/api/NodeFunction?code=mM5wE6cMV5ftl826e888hc-Dor0tQwSj4XN34yiXLrSdAzFu7oyJ2Q==",
+  "python": "https://func-bfh-azfperf-python-test-01.azurewebsites.net/api/orchestrators/{functionName}?code=JhblD6VcoNVacQiS9KYh_au3ZdbUyCPLm3-JZ2gh0xygAzFu43eBOA==",
+  "powershell": "https://func-bfh-azfperf-powershell-test-01.azurewebsites.net/api/PowerShellFunction?code=DbHQ3RelSNPuFTRXAD4ME-SMMgnvxcn6CKd1eEGBhq6zAzFurFFUTA==",
   "java": "https://java-example.azurewebsites.net/api/JavaFunction?code=REPLACE_WITH_FUNCTION_KEY"
 }

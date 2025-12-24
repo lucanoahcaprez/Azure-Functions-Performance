@@ -7,13 +7,11 @@ import time
 from datetime import datetime
 import azure.functions as func
 
-
 def _cpu_workload(iterations: int) -> float:
     acc = 0.0
     for i in range(1, iterations + 1):
         acc += math.sqrt(i) / math.log(i + 1)
     return acc
-
 
 def _io_workload(size_kb: int) -> int:
     data = os.urandom(size_kb * 1024)
@@ -28,12 +26,6 @@ def _io_workload(size_kb: int) -> int:
         logging.warning("Temp file cleanup failed")
     return length
 
-
-app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
-
-
-@app.function_name(name="PythonFunction")
-@app.route(route="PythonFunction", methods=["GET", "POST"])
 def main(req: func.HttpRequest) -> func.HttpResponse:
     workload = (req.params.get("workload") or "").lower()
     iterations = int(req.params.get("iterations") or 250000)
