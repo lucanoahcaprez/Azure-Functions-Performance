@@ -21,7 +21,9 @@ build:
   variables:
     PUBLIC_USE_EXAMPLE_FUNCTIONS: "1"
   script:
+    - echo "PUBLIC_USE_EXAMPLE_FUNCTIONS=$PUBLIC_USE_EXAMPLE_FUNCTIONS"
     - pnpm build
+    
   artifacts:
     paths:
       - webapp/build
