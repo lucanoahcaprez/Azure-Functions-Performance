@@ -1,5 +1,6 @@
 <script>
   import { onMount } from "svelte";
+  import { PUBLIC_USE_EXAMPLE_FUNCTIONS } from "$env/static/public";
 
   const STORAGE_KEY = "functionBench.baseUrls.v2";
 
@@ -144,7 +145,7 @@
   const currentYear = new Date().getFullYear();
   const version = __PKG_VERSION__;
   const useExampleFunctions = Boolean(
-    (import.meta.env.PUBLIC_USE_EXAMPLE_FUNCTIONS ?? "").trim(),
+    (PUBLIC_USE_EXAMPLE_FUNCTIONS ?? "").trim(),
   );
 
   console.log(useExampleFunctions)
