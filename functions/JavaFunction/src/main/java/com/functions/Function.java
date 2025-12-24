@@ -1,6 +1,7 @@
-package com.example;
+package com.functions;
 
 import com.microsoft.azure.functions.*;
+import com.microsoft.azure.functions.annotation.*;
 import java.nio.file.*;
 import java.time.*;
 import java.util.*;

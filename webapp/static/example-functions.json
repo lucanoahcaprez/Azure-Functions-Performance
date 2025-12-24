@@ -3,5 +3,5 @@
   "node": "https://func-bfh-azfperf-node-test-01.azurewebsites.net/api/NodeFunction?code=mM5wE6cMV5ftl826e888hc-Dor0tQwSj4XN34yiXLrSdAzFu7oyJ2Q==",
   "python": "https://func-bfh-azfperf-python-test-01.azurewebsites.net/api/orchestrators/{functionName}?code=JhblD6VcoNVacQiS9KYh_au3ZdbUyCPLm3-JZ2gh0xygAzFu43eBOA==",
   "powershell": "https://func-bfh-azfperf-powershell-test-01.azurewebsites.net/api/PowerShellFunction?code=DbHQ3RelSNPuFTRXAD4ME-SMMgnvxcn6CKd1eEGBhq6zAzFurFFUTA==",
-  "java": "https://java-example.azurewebsites.net/api/JavaFunction?code=REPLACE_WITH_FUNCTION_KEY"
+  "java": "https://func-bfh-azfperf-java-test-01.azurewebsites.net/api/JavaFunction?code=K1sNIbEPO1UT9hcCCLL91BY-KeXUB-ma5y6Rwg9HQVLVAzFu28CPPw=="
 }
