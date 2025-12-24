@@ -423,7 +423,7 @@
           bodySnippet,
         },
         ...recentRequests,
-      ].slice(0, 100);
+      ].slice(0, 1000);
     }
     return { ok, status, durationMs };
   }
