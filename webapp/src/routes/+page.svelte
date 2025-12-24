@@ -143,9 +143,11 @@
 
   const currentYear = new Date().getFullYear();
   const version = __PKG_VERSION__;
-  const useExampleFunctions = /^(1|true|yes)$/i.test(
-    import.meta.env.PUBLIC_USE_EXAMPLE_FUNCTIONS ?? "",
+  const useExampleFunctions = Boolean(
+    (import.meta.env.PUBLIC_USE_EXAMPLE_FUNCTIONS ?? "").trim(),
   );
+
+  console.log(useExampleFunctions)
 
   let selectedRuntimeId = "";
   let selectedWorkloadId = "";
