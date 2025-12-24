@@ -55,6 +55,21 @@ jobs:
           make_zip python PythonFunction
           make_zip powershell PowerShellFunction
 
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+          cache: "maven"
+
+      - name: Build Java package
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd functions/JavaFunction && mvn clean package)
+          (cd functions/JavaFunction/target/azure-functions/func-bfh-azfperf-java-test-01 \
+            && zip -r -q "${GITHUB_WORKSPACE}/dist/java.zip" .)
+
       - name: Ensure release tag (manual runs)
         if: github.event_name == 'workflow_dispatch'
         shell: bash

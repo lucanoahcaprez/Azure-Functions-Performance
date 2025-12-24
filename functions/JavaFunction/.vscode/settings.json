@@ -1,6 +1,6 @@
 {
     "azureFunctions.javaBuildTool": "maven",
-    "azureFunctions.deploySubpath": "<function_build_path>",
+    "azureFunctions.deploySubpath": "target/azure-functions/azure-functions-sample",
     "azureFunctions.projectLanguage": "Java",
     "azureFunctions.projectRuntime": "~3",
     "debug.internalConsoleOptions": "neverOpen",

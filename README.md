@@ -6,7 +6,14 @@ This repository compares Azure Function runtimes by invoking example workloads a
 - `webapp/`: Frontend-only Svelte + Tailwind app for triggering functions, running automated test rounds, and charting results.
 
 ## Goal
-Give a quick, side‑by‑side look at runtime behavior (CPU/IO/delay) with minimal setup: paste your signed Function URLs, run tests, and review timelines/logs.
+Give a quick, side-by-side look at runtime behavior (CPU/IO/delay) with minimal setup: paste your signed Function URLs, run tests, and review timelines/logs.
+
+## Prerequisites
+- Azure subscription.
+- Azure CLI (for deploying resources or zips).
+- Optional: Azure Functions Core Tools (for local runs).
+- Webapp build: Node.js 20+ and npm/pnpm.
+- Java function build: JDK 8+ and Maven (or the Maven wrapper if present).
 
 ## High-level flow
 1) Deploy the sample functions for the runtimes you want to measure.  
