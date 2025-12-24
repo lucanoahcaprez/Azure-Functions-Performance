@@ -80,7 +80,7 @@ mirror_github:
     - git remote remove github || true
     - git remote add github https://$GITHUB_USERNAME:$GITHUB_TOKEN@github.com/$GITHUB_USERNAME/Azure-Functions-Performance.git
     - git fetch --prune --tags origin
-    - git push --force github HEAD:main
+    - git push --force github HEAD:refs/heads/main
     - git push --force --tags github
   only:
     - main
