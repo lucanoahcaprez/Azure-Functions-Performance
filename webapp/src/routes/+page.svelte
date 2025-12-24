@@ -199,6 +199,22 @@
   $: minTs = timelineRequests[0]?.timestamp ?? Date.now();
   $: maxTs = timelineRequests.at(-1)?.timestamp ?? minTs + 1;
   $: span = Math.max(1, maxTs - minTs);
+  $: averageByRuntime = (() => {
+    if (!recentRequests.length) return [];
+    return runtimeOptions
+      .map((runtime) => {
+        const entries = recentRequests.filter((req) => req.runtimeId === runtime.id);
+        if (!entries.length) return null;
+        const total = entries.reduce((sum, req) => sum + (req.durationMs ?? 0), 0);
+        return {
+          runtimeId: runtime.id,
+          runtimeName: runtime.name,
+          avgDurationMs: total / entries.length,
+          count: entries.length,
+        };
+      })
+      .filter(Boolean);
+  })();
   $: seriesData = (() => {
     const grouped = new Map();
     timelineRequests.forEach((req) => {
@@ -693,12 +709,34 @@
                     <div class="text-cyan-200">{formatDuration(hoveredPoint.duration)}</div>
                   </div>
                 </div>
-              {/if}
-            {/if}
-          </div>
-        </div>
-
-        {#if recentRequests[0]}
+                {/if}
+                {/if}
+              </div>
+            </div>
+            
+            {#if recentRequests[0]}
+            
+                    <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+                      <div class="flex items-center justify-between gap-3">
+                        <div>
+                          <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Average runtime</p>
+                          <p class="text-sm text-slate-300">Per runtime (from recent requests)</p>
+                        </div>
+                        <span class="text-xs text-slate-400">{recentRequests.length} total</span>
+                      </div>
+                      {#if averageByRuntime.length === 0}
+                        <div class="mt-3 text-sm text-slate-400">Run a request to see averages.</div>
+                      {:else}
+                        <div class="mt-3 grid gap-2">
+                          {#each averageByRuntime as avg}
+                            <div class="flex items-center justify-between rounded-xl border border-white/5 bg-black/20 px-3 py-2">
+                              <span class="text-sm text-slate-100">{avg.runtimeName}</span>
+                              <span class="text-sm text-cyan-100">{formatDuration(avg.avgDurationMs)} · {avg.count} runs</span>
+                            </div>
+                          {/each}
+                        </div>
+                      {/if}
+                    </div>
           <div class="rounded-2xl border border-cyan-400/30 bg-cyan-400/10 p-4 shadow-neon">
             <p class="text-xs text-cyan-100 uppercase tracking-[0.2em]">Latest run</p>
             <div class="flex items-center justify-between gap-3">
