@@ -1,43 +1,79 @@
 # Azure Function Performance Bench
 
-This repository compares Azure Function runtimes by invoking example workloads and visualizing latency trends. It has two main parts:
+This repository benchmarks Azure Function runtimes by invoking identical workloads and visualizing latency trends in a frontend-only webapp.
 
-- `functions/`: Language-specific Azure Functions (PowerShell, Node.js, Python, .NET/C#, Java) that expose identical workload parameters.
-- `webapp/`: Frontend-only Svelte + Tailwind app for triggering functions, running automated test rounds, and charting results.
+## 📁 Repository Structure
+```
+├── deployment/                       # ARM/Bicep templates and deploy docs
+├── functions/                        # Azure Functions per runtime (dotnet, node, python, powershell, java)
+├── webapp/                           # SvelteKit frontend-only UI
+├── .github/workflows/                # Release packaging workflows
+├── .gitlab-ci.yml                    # CI pipeline (if used)
+└── README.md                         # This file
+```
 
-## Goal
-Give a quick, side-by-side look at runtime behavior (CPU/IO/delay) with minimal setup: paste your signed Function URLs, run tests, and review timelines/logs.
+## 🚀 Quick Start
 
-## Prerequisites
-- Azure subscription.
-- Azure CLI (for deploying resources or zips).
-- Optional: Azure Functions Core Tools (for local runs).
-- Webapp build: Node.js 20+ and npm/pnpm.
-- Java function build: JDK 8+ and Maven (or the Maven wrapper if present).
+### Prerequisites
+1. Azure subscription with permissions to create resource groups and Function Apps
+2. Azure CLI (for deployments and zip deploy)
+3. Optional: Azure Functions Core Tools (local runs)
+4. Webapp build: Node.js 20+ and npm/pnpm
+5. Java function build: JDK 17 and Maven
+6. .NET function build: .NET SDK 8
 
-## High-level flow
-1) Deploy the sample functions for the runtimes you want to measure.  
-2) Open the webapp, paste one signed URL per runtime in the setup wizard.  
-3) Run manual calls or automatic batches; the UI records durations and renders a combined timeline and trend chart.
+### High-Level Flow
+1. Deploy the sample functions for the runtimes you want to measure
+2. Open the webapp and paste one signed Function URL per runtime
+3. Run manual calls or automated batches; the UI records durations and renders timelines and trends
 
-## Sample page
-Live example: https://azfunctionsperformance.apps.lucanoahcaprez.ch/
+### Live Example
+https://azfunctionsperformance.apps.lucanoahcaprez.ch/
 
-## Deploy Functions to Azure
+## 🔄 Deployment Methods
+
+### Method 1: Deploy Functions via ARM/Bicep
+Use the deploy button to create one Function App per runtime. The template optionally accepts zip package URIs.
+
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Flucanoahcaprez%2FAzure-Functions-Performance%2Fmain%2Fdeployment%2Fazuredeploy.json)
 
-The template creates one Function App per runtime and can optionally deploy code via zip package URIs. See `deployment/DEPLOYMENT.md` for details.
+Details: `deployment/README.md`
 
-## Deploy the webapp with Docker
+### Method 2: Use Release Zip Packages
+The GitHub workflow packages each runtime into release zips. See:
+- `.github/workflows/release-functions.yml`
+- `deployment/README.md`
+
+### Method 3: Deploy the Webapp with Docker
 From the repo root:
 ```sh
 docker build -t azfunctionsperformance-webapp ./webapp
 docker run --rm -p 8080:80 azfunctionsperformance-webapp
 ```
-Open http://localhost:8080 and add your signed Function URLs in the setup wizard.
+Open `http://localhost:8080` and add your signed Function URLs in the setup wizard.
 
-## Workloads (shared parameters)
+## Workloads (Shared Parameters)
+Each runtime accepts identical parameters:
 - `workload`: `cpu` | `io` | `delay`
 - `iterations` (cpu), `sizeKb` (io), `delayMs` (delay)
 
-All runtimes accept these query parameters and return JSON with runtime, workload, durationMs, timestamp, and echoed request info.
+All functions return JSON with runtime, workload, durationMs, timestamp, and echoed request info.
+
+## Documentation Index
+- Deployment template and infra: `deployment/README.md`
+- Webapp details and configuration: `webapp/README.md`
+- Runtime-specific function guides:
+  - .NET: `functions/DotnetFunction/README.md`
+  - Node.js: `functions/NodeFunction/README.md`
+  - Python: `functions/PythonFunction/README.md`
+  - PowerShell: `functions/PowerShellFunction/README.md`
+  - Java: `functions/JavaFunction/README.md`
+
+## Webapp Configuration Notes
+- URLs are stored in the browser under `functionBench.baseUrls.v2`
+- Optional example URL map: `webapp/static/example-functions.json`
+- Env flag: `PUBLIC_USE_EXAMPLE_FUNCTIONS` (see `webapp/README.md`)
+
+## Security Notes
+- The app is client-only. Function URLs are stored and requested from the user's browser.
+- Treat signed Function URLs (`?code=...`) as secrets.
