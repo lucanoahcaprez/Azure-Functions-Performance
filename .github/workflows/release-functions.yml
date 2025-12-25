@@ -44,7 +44,7 @@ jobs:
             local out="dist/${runtime}.zip"
             local tmp
             tmp="$(mktemp -d)"
-            cp deployment/host.json "${tmp}/host.json"
+            cp "functions/${src_dir}/host.json" "${tmp}/host.json"
             mkdir -p "${tmp}/${src_dir}"
             cp -R "functions/${src_dir}/." "${tmp}/${src_dir}/"
             (cd "${tmp}" && zip -r -q "${GITHUB_WORKSPACE}/${out}" .)
@@ -54,6 +54,18 @@ jobs:
           make_zip node NodeFunction
           make_zip python PythonFunction
           make_zip powershell PowerShellFunction
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Build .NET package
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd functions/DotnetFunction && dotnet publish -c Release -o publish)
+          (cd functions/DotnetFunction/publish && zip -r -q "${GITHUB_WORKSPACE}/dist/dotnet.zip" .)
 
       - name: Setup Java
         uses: actions/setup-java@v4

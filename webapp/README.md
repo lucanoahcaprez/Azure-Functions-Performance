@@ -39,7 +39,7 @@ Output is written to `webapp/build/`.
 If set to a truthy value (`1`, `true`, `yes`), the app attempts to load default URLs from `/example-functions.json` when no stored URLs are found.
 
 Where it reads:
-- In the app: `import.meta.env.PUBLIC_USE_EXAMPLE_FUNCTIONS`.
+- In the app: `env.PUBLIC_USE_EXAMPLE_FUNCTIONS` from `$env/dynamic/public`.
 - The file must exist at `webapp/static/example-functions.json`.
 
 Expected JSON shape:
@@ -61,7 +61,7 @@ If localStorage already has URLs, those win and the example file is ignored.
   - `workload=cpu|io|delay`
   - `iterations` (CPU), `sizeKb` (IO), `delayMs` (delay)
 - `Call Function`: single request.
-- `Test automatically`: runs each configured workload 10 times per runtime.
+- `Test automatically`: runs all runtimes for CPU first, then IO, then delay (10 runs each) to keep comparisons aligned.
 - Results are recorded with duration, status, and a response snippet (first 240 chars).
 
 ## Visuals
