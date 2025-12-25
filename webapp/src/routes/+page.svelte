@@ -1,6 +1,6 @@
 <script>
   import { onMount } from "svelte";
-  import { PUBLIC_USE_EXAMPLE_FUNCTIONS } from "$env/static/public";
+  import { env } from "$env/dynamic/public";
 
   const STORAGE_KEY = "functionBench.baseUrls.v2";
 
@@ -15,7 +15,7 @@
         {
           id: "cpu",
           name: "CPU intensive",
-          description: "Floating-point loop to stress compute.",
+          description: "Math heavy .NET loop to stress CPU.",
           params: { iterations: "300000" },
         },
         {
@@ -27,7 +27,7 @@
         {
           id: "delay",
           name: "Delay",
-          description: "Simple wait to observe cold starts.",
+          description: "Simple timeout-driven delay to observe cold starts.",
           params: { delayMs: "300" },
         },
       ],
@@ -42,19 +42,19 @@
         {
           id: "cpu",
           name: "CPU intensive",
-          description: "Math loop to exercise the event loop.",
+          description: "Math heavy Node.js loop to stress CPU.",
           params: { iterations: "300000" },
         },
         {
           id: "io",
           name: "IO heavy",
-          description: "Temp file write/read round-trip.",
+          description: "Temp file write/read to stress IO.",
           params: { sizeKb: "256" },
         },
         {
           id: "delay",
           name: "Delay",
-          description: "Timeout-driven delay.",
+          description: "Simple timeout-driven delay to observe cold starts.",
           params: { delayMs: "300" },
         },
       ],
@@ -69,19 +69,19 @@
         {
           id: "cpu",
           name: "CPU intensive",
-          description: "Math heavy loop to stress CPU.",
+          description: "Math heavy Python loop to stress CPU.",
           params: { iterations: "300000" },
         },
         {
           id: "io",
           name: "IO heavy",
-          description: "Temp file write/read round-trip.",
+          description: "Temp file write/read to stress IO.",
           params: { sizeKb: "256" },
         },
         {
           id: "delay",
           name: "Delay",
-          description: "Sleep-based delay.",
+          description: "Simple timeout-driven delay to observe cold starts.",
           params: { delayMs: "300" },
         },
       ],
@@ -96,19 +96,19 @@
         {
           id: "cpu",
           name: "CPU intensive",
-          description: "PowerShell math loop workload.",
+          description: "Math heavy PowerShell loop to stress CPU.",
           params: { iterations: "300000" },
         },
         {
           id: "io",
           name: "IO heavy",
-          description: "Temp file IO round-trip.",
+          description: "Temp file write/read to stress IO.",
           params: { sizeKb: "256" },
         },
         {
           id: "delay",
           name: "Delay",
-          description: "Sleep-based delay.",
+          description: "Simple timeout-driven delay to observe cold starts.",
           params: { delayMs: "300" },
         },
       ],
@@ -123,19 +123,19 @@
         {
           id: "cpu",
           name: "CPU intensive",
-          description: "Math-heavy loop.",
+          description: "Math heavy Java loop to stress CPU.",
           params: { iterations: "300000" },
         },
         {
           id: "io",
           name: "IO heavy",
-          description: "Temp file write/read.",
+          description: "Temp file write/read to stress IO.",
           params: { sizeKb: "256" },
         },
         {
           id: "delay",
           name: "Delay",
-          description: "Sleep-based delay.",
+          description: "Simple timeout-driven delay to observe cold starts.",
           params: { delayMs: "300" },
         },
       ],
@@ -145,10 +145,8 @@
   const currentYear = new Date().getFullYear();
   const version = __PKG_VERSION__;
   const useExampleFunctions = Boolean(
-    (PUBLIC_USE_EXAMPLE_FUNCTIONS ?? "").trim(),
+    (env.PUBLIC_USE_EXAMPLE_FUNCTIONS ?? "").trim(),
   );
-
-  console.log(useExampleFunctions)
 
   let selectedRuntimeId = "";
   let selectedWorkloadId = "";
@@ -470,10 +468,17 @@
 
     const runsPerWorkload = 10;
     const tasks = [];
-    configuredRuntimes.forEach((runtime) => {
-      const base = (urlMap[runtime.id] ?? "").trim();
-      if (!base) return;
-      runtime.workloads.forEach((workload) => {
+    const workloadOrder = ["cpu", "io", "delay"];
+    const runtimeMap = new Map(
+      configuredRuntimes.map((runtime) => [runtime.id, runtime]),
+    );
+
+    workloadOrder.forEach((workloadId) => {
+      configuredRuntimes.forEach((runtime) => {
+        const base = (urlMap[runtime.id] ?? "").trim();
+        if (!base) return;
+        const workload = runtime.workloads.find((w) => w.id === workloadId);
+        if (!workload) return;
         for (let i = 0; i < runsPerWorkload; i++) {
           const url = appendParams(base, {
             workload: workload.id,
