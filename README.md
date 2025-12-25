@@ -1,6 +1,9 @@
 # Azure Function Performance Bench
 
-This repository benchmarks Azure Function runtimes by invoking identical workloads and visualizing latency trends in a frontend-only webapp.
+This repository provides a complete, deployable benchmark suite for Azure Functions. It includes:
+- Deployment templates that create one Function App per runtime (Flex Consumption) plus required storage and Application Insights using eighter Bicep or ARM templates.
+- Example functions in .NET, Node.js, Python, PowerShell, and Java that expose identical workload parameters (CPU, IO, delay benchmarks).
+- A static SvelteKit webapp that calls those functions, runs automated batches, and visualizes latency trends.
 
 ## 📁 Repository Structure
 ```
@@ -28,7 +31,14 @@ This repository benchmarks Azure Function runtimes by invoking identical workloa
 3. Run manual calls or automated batches; the UI records durations and renders timelines and trends
 
 ### Live Example
-https://azfunctionsperformance.apps.lucanoahcaprez.ch/
+There is a public hosted version of this projects webapp. It has the example functions from `./functions/` directory. To visit an example of the webapp use this button:
+
+<a href="https://azfunctionsperformance.apps.lucanoahcaprez.ch/" style="display:inline-block;padding:8px 14px;border-radius:10px;border:1px solid currentColor;color:inherit;font-weight:600;text-decoration:none;background:rgba(255,255,255,0.06);">Visit Azure Functions Performance Webapp</a>
+<br>
+<br>
+After running the automatic mode it will look sort of like that:
+
+<img src="webapp/docs/screenshot-webapp.png" alt="Webapp screenshot" width="900" />
 
 ## 🔄 Deployment Methods
 
