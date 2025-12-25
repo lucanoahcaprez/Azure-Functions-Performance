@@ -642,7 +642,7 @@
             </div>
             <div class="flex items-center gap-2">
               <button
-                class="px-3 py-2 rounded-xl border border-cyan-400/40 bg-cyan-400/10 text-cyan-100 text-sm hover:shadow-neon transition"
+                class="flex items-center justify-center text-center px-3 py-2 rounded-xl border border-cyan-400/40 bg-cyan-400/10 text-cyan-100 text-sm hover:shadow-neon transition"
                 on:click={openWizard}
               >
                 {configuredRuntimes.length ? "Edit URLs" : "Set URLs"}
@@ -667,7 +667,7 @@
               <div class="flex flex-wrap gap-3">
                 {#each configuredRuntimes as runtime}
                   <button
-                    class={`px-4 py-2 rounded-xl border transition-all duration-200 text-sm font-semibold ${
+                    class={`flex items-center justify-center text-center px-4 py-2 rounded-xl border transition-all duration-200 text-sm font-semibold ${
                       selectedRuntimeId === runtime.id
                         ? "border-cyan-400/70 bg-cyan-400/10 text-cyan-100 shadow-neon"
                         : "border-white/10 bg-white/5 text-slate-200 hover:border-cyan-400/40 hover:text-cyan-100"
@@ -736,7 +736,7 @@
                   >
                 </div>
                 <button
-                  class="text-xs px-3 py-1 rounded-lg border border-white/10 bg-white/5 hover:border-cyan-400/50"
+                  class="flex items-center justify-center text-center text-xs px-3 py-1 rounded-lg border border-white/10 bg-white/5 hover:border-cyan-400/50"
                   on:click={openWizard}
                 >
                   Edit
@@ -750,18 +750,18 @@
               </div>
             </div>
 
-            <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <div class="grid gap-3 sm:grid-cols-3">
               <button
-                class="w-full px-5 py-3 rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-900 font-semibold shadow-neon hover:scale-[1.01] transition"
+                class="flex items-center justify-center text-center w-full min-h-[52px] px-5 py-3 rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-900 font-semibold shadow-neon hover:scale-[1.01] transition whitespace-nowrap"
                 on:click={runFunction}
                 disabled={isLoading || isAutoLoading}
               >
                 {#if isLoading}
-                  <span class="flex items-center gap-2">
+                  <span class="flex items-center justify-center gap-2 w-full min-w-0">
                     <span
-                      class="w-4 h-4 rounded-full border-2 border-white/50 border-t-white animate-spin"
+                      class="w-4 h-4 rounded-full border-2 border-white/50 border-t-white animate-spin shrink-0"
                     ></span>
-                    Calling Azure Function...
+                    <span class="truncate">Calling Azure Function...</span>
                   </span>
                 {:else}
                   Call Function
@@ -769,16 +769,16 @@
               </button>
 
               <button
-                class="w-full px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 text-slate-900 font-semibold shadow-neon hover:scale-[1.01] transition"
+                class="flex items-center justify-center text-center w-full min-h-[52px] px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 text-slate-900 font-semibold shadow-neon hover:scale-[1.01] transition whitespace-nowrap"
                 on:click={runAutomaticTests}
                 disabled={isLoading || isAutoLoading}
               >
                 {#if isAutoLoading}
-                  <span class="flex items-center gap-2">
+                  <span class="flex items-center justify-center gap-2 w-full min-w-0">
                     <span
-                      class="w-4 h-4 rounded-full border-2 border-white/50 border-t-white animate-spin"
+                      class="w-4 h-4 rounded-full border-2 border-white/50 border-t-white animate-spin shrink-0"
                     ></span>
-                    Testing automatically...
+                    <span class="truncate">Testing automatically...</span>
                   </span>
                 {:else}
                   Test automatically
@@ -786,17 +786,17 @@
               </button>
 
               <button
-                class="w-full px-4 py-3 rounded-2xl border border-white/10 bg-white/5 text-slate-200 hover:border-cyan-400/50 hover:text-cyan-100 transition"
+                class="flex items-center justify-center text-center w-full min-h-[52px] px-4 py-3 rounded-2xl border border-white/10 bg-white/5 text-slate-200 hover:border-cyan-400/50 hover:text-cyan-100 transition whitespace-nowrap"
                 on:click={clearHistory}
                 disabled={isLoading || isAutoLoading}
               >
                 Clear history
               </button>
               {#if message}
-                <span class="sm:col-span-2 xl:col-span-4 text-sm text-emerald-300">{message}</span>
+                <span class="sm:col-span-3 text-sm text-emerald-300">{message}</span>
               {/if}
               {#if error}
-                <span class="sm:col-span-2 xl:col-span-4 text-sm text-amber-300">{error}</span>
+                <span class="sm:col-span-3 text-sm text-amber-300">{error}</span>
               {/if}
             </div>
           {/if}
@@ -1114,7 +1114,7 @@
               </p>
             </div>
             <button
-              class="px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-slate-200 hover:border-cyan-400/50"
+              class="flex items-center justify-center text-center px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-slate-200 hover:border-cyan-400/50"
               on:click={() => (showConfig = false)}
             >
               Close
@@ -1151,13 +1151,13 @@
 
           <div class="flex items-center gap-3 justify-end">
             <button
-              class="px-4 py-3 rounded-2xl border border-white/10 bg-white/5 text-slate-200 hover:border-cyan-400/50 transition"
+              class="flex items-center justify-center text-center px-4 py-3 rounded-2xl border border-white/10 bg-white/5 text-slate-200 hover:border-cyan-400/50 transition"
               on:click={() => (showConfig = false)}
             >
               Cancel
             </button>
             <button
-              class="px-5 py-3 rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-900 font-semibold shadow-neon hover:scale-[1.01] transition"
+              class="flex items-center justify-center text-center px-5 py-3 rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-900 font-semibold shadow-neon hover:scale-[1.01] transition"
               on:click={saveWizard}
             >
               Save & continue

@@ -2,6 +2,10 @@
 
 Frontend-only UI for triggering the sample Azure Functions, running automated batches, and visualizing latency trends. It is a static site with no backend.
 
+For a live demo visit the following link: 
+This is a screenshot of an example workload run:
+<img src="docs/screenshot-webapp.png" alt="Webapp screenshot" width="900" />
+
 ## Structure
 - `webapp/src/routes/+page.svelte`: main UI and logic (runtime selection, calls, charts, setup wizard).
 - `webapp/src/app.css`: global styling (fonts, gradients, layout).
