@@ -1069,14 +1069,14 @@
                 </div>
 
                 <div class="flex items-center gap-3">
-                  <div class="flex-1 h-2 rounded-full bg-white/5">
+                  <div class="w-24 shrink-0 h-2 rounded-full bg-white/5">
                     <div
                       class="h-2 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 transition-all"
                       style={`width: ${relativeDurationWidth(req.durationMs)}%; max-width: 100%;`}
                     ></div>
                   </div>
                   <code
-                    class="text-[11px] text-slate-300 font-mono bg-black/30 px-3 py-1 rounded-lg border border-white/5 break-all"
+                    class="min-w-0 flex-1 text-[11px] text-slate-300 font-mono bg-black/30 px-3 py-1 rounded-lg border border-white/5 break-all"
                   >
                     {req.url}
                   </code>
