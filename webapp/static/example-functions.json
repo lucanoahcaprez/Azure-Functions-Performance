@@ -1,7 +1,7 @@
 {
-  "dotnet": "https://dotnet-example.azurewebsites.net/api/DotnetFunction?code=REPLACE_WITH_FUNCTION_KEY",
-  "node": "https://func-bfh-azfperf-node-test-01.azurewebsites.net/api/NodeFunction?code=mM5wE6cMV5ftl826e888hc-Dor0tQwSj4XN34yiXLrSdAzFu7oyJ2Q==",
-  "python": "https://func-bfh-azfperf-python-test-01.azurewebsites.net/api/orchestrators/{functionName}?code=JhblD6VcoNVacQiS9KYh_au3ZdbUyCPLm3-JZ2gh0xygAzFu43eBOA==",
-  "powershell": "https://func-bfh-azfperf-powershell-test-01.azurewebsites.net/api/PowerShellFunction?code=DbHQ3RelSNPuFTRXAD4ME-SMMgnvxcn6CKd1eEGBhq6zAzFurFFUTA==",
-  "java": "https://func-bfh-azfperf-java-test-01.azurewebsites.net/api/JavaFunction?code=K1sNIbEPO1UT9hcCCLL91BY-KeXUB-ma5y6Rwg9HQVLVAzFu28CPPw=="
+  "dotnet": "https://func-bfh-azfperf-dotnet-test-01.azurewebsites.net/DotnetFunction?code=e7zoQuGpjlyPGX8cT1L0lgIQ3TsQcocNVHyZaa96PZFNAzFuBoHLkA==",
+  "node": "https://func-bfh-azfperf-node-test-01.azurewebsites.net/api/NodeFunction?code=anxLLyhcb26UKfj-4oaGJ6NwMDbH1swuMYpVBzn9vagKAzFuXg-x5g==",
+  "powershell": "https://func-bfh-azfperf-powershell-test-01.azurewebsites.net/api/PowerShellFunction?code=Z_eqtgPnM2nPtNVyvDkOxl-4IHWsLaVoWyqvdV4_engVAzFu8dXjiw==",
+  "python": "https://func-bfh-azfperf-python-test-01.azurewebsites.net/api/PythonFunction?code=KK5lbPpQ_M8ZXdNfHg2wWjhEud6VNvGt6gFaIVOrZHyTAzFuM1LYcg==",
+  "java": "https://func-bfh-azfperf-java-test-01.azurewebsites.net/api/JavaFunction?code=oFIrEGOKfJPeRDGMKYYtpvEyjbwR6hEKSS2aiHB2YxlOAzFu2zAqPw=="
 }
